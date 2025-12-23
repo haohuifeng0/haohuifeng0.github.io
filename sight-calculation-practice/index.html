@@ -27,20 +27,25 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 800px;
             width: 100%;
             margin: 0 auto;
             display: flex;
+            flex-direction: column;
             gap: 20px;
         }
 
         .setup-panel {
             background: var(--card-bg);
             border-radius: 8px;
-            padding: 25px;
+            padding: 40px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            width: 350px;
+            width: 100%;
             flex-shrink: 0;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
         }
 
         .control-group {
@@ -120,6 +125,8 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .problem-display {
@@ -176,9 +183,11 @@
         .result-area {
             background: var(--card-bg);
             border-radius: 8px;
-            padding: 25px;
+            padding: 40px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             display: none;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .result-header {
@@ -239,6 +248,123 @@
 
         .hidden {
             display: none;
+        }
+        
+        .toggle-panel-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            margin: 15px auto 0;
+        }
+
+        .toggle-panel-btn:hover {
+            background: #2980b9;
+        }
+
+        .setup-panel.collapsed .panel-content {
+            display: none;
+        }
+
+        .setup-panel.collapsed .toggle-panel-btn {
+            margin: 15px auto 0;
+        }
+
+        .setup-panel:not(.collapsed) {
+            transition: height 0.3s ease;
+        }
+
+        .toggle-panel-btn:hover {
+            background: #2980b9;
+        }
+
+        /* 通用上下收缩 */
+        .setup-panel.collapsed {
+            overflow: hidden;
+            transition: height 0.3s ease;
+        }
+        
+        .setup-panel.collapsed .panel-content {
+            display: none;
+        }
+
+        .setup-panel.collapsed .toggle-panel-btn {
+            align-self: center;
+        }
+
+        .setup-panel:not(.collapsed) {
+            transition: height 0.3s ease;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .setup-panel {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .setup-panel {
+                width: 100%;
+            }
+
+            .main-content {
+                width: 100%;
+            }
+            
+            .exercise-area {
+                padding: 20px;
+            }
+
+            .problem-display {
+                font-size: 32px;
+            }
+
+            .number-pad {
+                max-width: 100%;
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .number-btn {
+                width: 70px;
+                height: 70px;
+                font-size: 20px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .problem-display {
+                font-size: 24px;
+            }
+            
+            .number-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 18px;
+            }
+            
+            .answer-input input {
+                width: 120px;
+                font-size: 20px;
+            }
         }
 
         .number-pad {
@@ -307,47 +433,50 @@
 </head>
 <body>
     <div class="container">
-        <div class="setup-panel">
-            <h2>视算生成练习</h2>
-            <p>自定义练习参数，训练心算能力</p>
-            
-            <div class="control-group">
-                <label for="problemCount">题目数量</label>
-                <div class="control-row">
-                    <div>
-                        <input type="number" id="problemCount" min="1" max="100" value="10">
-                        <span>道题</span>
+        <div class="setup-panel" id="setupPanel">
+            <div class="panel-content">
+                <h2>视算生成练习</h2>
+                <p>自定义练习参数，训练心算能力</p>
+                
+                <div class="control-group">
+                    <label for="problemCount">题目数量</label>
+                    <div class="control-row">
+                        <div>
+                            <input type="number" id="problemCount" min="1" max="100" value="10">
+                            <span>道题</span>
+                        </div>
+                        <input type="range" id="problemCountSlider" min="1" max="100" value="10">
                     </div>
-                    <input type="range" id="problemCountSlider" min="1" max="100" value="10">
+                </div>
+                
+                <div class="control-group">
+                    <label for="resultRange">得数范围</label>
+                    <div class="control-row">
+                        <div>
+                            <input type="number" id="resultRange" min="10" max="1000" value="10">
+                            <span>以内</span>
+                        </div>
+                        <input type="range" id="resultRangeSlider" min="10" max="1000" value="10">
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="displayInterval">每题显示间隔</label>
+                    <div class="control-row">
+                        <div>
+                            <input type="number" id="displayInterval" min="1" max="60" value="5">
+                            <span>秒</span>
+                        </div>
+                        <input type="range" id="displayIntervalSlider" min="1" max="60" value="5">
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button id="startBtn" class="btn btn-start">开始练习</button>
+                    <button id="stopBtn" class="btn btn-stop" disabled>停止练习</button>
                 </div>
             </div>
-            
-            <div class="control-group">
-                <label for="resultRange">得数范围</label>
-                <div class="control-row">
-                    <div>
-                        <input type="number" id="resultRange" min="10" max="1000" value="10">
-                        <span>以内</span>
-                    </div>
-                    <input type="range" id="resultRangeSlider" min="10" max="1000" value="10">
-                </div>
-            </div>
-            
-            <div class="control-group">
-                <label for="displayInterval">每题显示间隔</label>
-                <div class="control-row">
-                    <div>
-                        <input type="number" id="displayInterval" min="1" max="60" value="5">
-                        <span>秒</span>
-                    </div>
-                    <input type="range" id="displayIntervalSlider" min="1" max="60" value="5">
-                </div>
-            </div>
-            
-            <div class="controls">
-                <button id="startBtn" class="btn btn-start">开始练习</button>
-                <button id="stopBtn" class="btn btn-stop" disabled>停止练习</button>
-            </div>
+            <button id="togglePanelBtn" class="toggle-panel-btn">收起配置 «</button>
         </div>
         
         <div class="main-content">
@@ -430,6 +559,8 @@
         const deleteBtn = document.getElementById('deleteBtn');
         const submitBtn = document.getElementById('submitBtn');
         const resultArea = document.getElementById('resultArea');
+        const setupPanel = document.getElementById('setupPanel');
+        const togglePanelBtn = document.getElementById('togglePanelBtn');
         const totalProblemsEl = document.getElementById('totalProblems');
         const correctAnswersEl = document.getElementById('correctAnswers');
         const accuracyRateEl = document.getElementById('accuracyRate');
@@ -525,6 +656,10 @@
             stopBtn.disabled = false;
             exerciseArea.classList.remove('hidden');
             resultArea.style.display = 'none';
+            
+            // 自动收起配置面板
+            setupPanel.classList.add('collapsed');
+            updateToggleButton();
 
             problemDisplay.textContent = "准备开始...";
             timerDisplay.textContent = `准备中...`;
@@ -598,6 +733,17 @@
                 numberPad.style.display = 'grid';
                 userAnswerInput.value = '';
                 
+                // 数字按钮点击事件
+                const handleNumberClick = (event) => {
+                    const number = event.target.getAttribute('data-number');
+                    userAnswerInput.value += number;
+                };
+                
+                // 删除按钮事件
+                const handleDelete = () => {
+                    userAnswerInput.value = userAnswerInput.value.slice(0, -1);
+                };
+                
                 // 提交答案按钮事件
                 const handleSubmit = () => {
                     if (!isWaitingForAnswer) return;
@@ -632,17 +778,6 @@
                     submitBtn.removeEventListener('click', handleSubmit);
                     
                     resolve();
-                };
-                
-                // 数字按钮点击事件
-                const handleNumberClick = (event) => {
-                    const number = event.target.getAttribute('data-number');
-                    userAnswerInput.value += number;
-                };
-                
-                // 删除按钮事件
-                const handleDelete = () => {
-                    userAnswerInput.value = userAnswerInput.value.slice(0, -1);
                 };
                 
                 // 回车键提交
@@ -719,6 +854,9 @@
         function restartPractice() {
             resultArea.style.display = 'none';
             exerciseArea.classList.add('hidden');
+            // 确保配置面板是展开的
+            setupPanel.classList.remove('collapsed');
+            updateToggleButton();
             startPractice();
         }
 
@@ -746,7 +884,33 @@
             answerInputArea.style.display = 'none';
             if(numberPad) numberPad.style.display = 'none';
             isWaitingForAnswer = false;
+            
+            // 练习停止后展开配置面板
+            setupPanel.classList.remove('collapsed');
+            updateToggleButton();
         }
+
+        // 配置面板展开/收缩功能
+        function updateToggleButton() {
+            if (setupPanel.classList.contains('collapsed')) {
+                // 如果面板已收起，显示展开文本
+                togglePanelBtn.textContent = '展开配置 »';
+            } else {
+                // 如果面板已展开，显示收起文本
+                togglePanelBtn.textContent = '收起配置 «';
+            }
+        }
+        
+        togglePanelBtn.addEventListener('click', () => {
+            setupPanel.classList.toggle('collapsed');
+            updateToggleButton();
+        });
+        
+        // 监听窗口大小变化，调整按钮文本
+        window.addEventListener('resize', updateToggleButton);
+        
+        // 页面加载完成后更新按钮文本
+        updateToggleButton();
 
         // 事件监听器
         startBtn.addEventListener('click', startPractice);
