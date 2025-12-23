@@ -22,17 +22,16 @@
             padding: 0;
             background-color: var(--bg-color);
             color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             min-height: 100vh;
             padding: 20px;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             width: 100%;
             margin: 0 auto;
+            display: flex;
+            gap: 20px;
         }
 
         .setup-panel {
@@ -40,7 +39,8 @@
             border-radius: 8px;
             padding: 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+            width: 350px;
+            flex-shrink: 0;
         }
 
         .control-group {
@@ -120,7 +120,6 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            margin-bottom: 20px;
         }
 
         .problem-display {
@@ -167,12 +166,18 @@
             flex-wrap: wrap;
         }
 
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
         .result-area {
             background: var(--card-bg);
             border-radius: 8px;
             padding: 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-top: 20px;
             display: none;
         }
 
@@ -235,6 +240,69 @@
         .hidden {
             display: none;
         }
+
+        .number-pad {
+            margin-top: 20px;
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 10px;
+            max-width: 200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .number-btn {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            font-weight: bold;
+            border: 2px solid var(--accent-color);
+            border-radius: 50%;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .number-btn:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .number-btn:active {
+            transform: scale(0.95);
+        }
+
+        .number-btn.zero {
+            grid-column: span 3;
+        }
+
+        .number-btn.number-zero {
+            grid-column: 1 / span 1;
+            grid-row: 4 / span 1;
+        }
+        
+        .number-btn.delete {
+            grid-column: 2 / span 1;
+            grid-row: 4 / span 1;
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .number-btn.delete:hover {
+            background-color: #c0392b;
+        }
+
+        .number-btn.submit {
+            grid-column: 3 / span 1;
+            grid-row: 4 / span 1;
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .number-btn.submit:hover {
+            background-color: #219653;
+        }
     </style>
 </head>
 <body>
@@ -258,10 +326,10 @@
                 <label for="resultRange">得数范围</label>
                 <div class="control-row">
                     <div>
-                        <input type="number" id="resultRange" min="10" max="1000" value="100">
+                        <input type="number" id="resultRange" min="10" max="1000" value="10">
                         <span>以内</span>
                     </div>
-                    <input type="range" id="resultRangeSlider" min="10" max="1000" value="100">
+                    <input type="range" id="resultRangeSlider" min="10" max="1000" value="10">
                 </div>
             </div>
             
@@ -282,47 +350,63 @@
             </div>
         </div>
         
-        <div id="exerciseArea" class="exercise-area hidden">
-            <div class="problem-display" id="problemDisplay">准备开始...</div>
-            <div class="timer" id="timer"></div>
-            <div class="answer-input" id="answerInput">
-                <input type="number" id="userAnswerInput" placeholder="输入答案" autofocus>
-                <button id="submitAnswerBtn" class="btn">提交</button>
-            </div>
-        </div>
-        
-        <div id="resultArea" class="result-area">
-            <div class="result-header">
-                <h2>练习完成！</h2>
-                <p>以下是您的练习结果</p>
-            </div>
-            
-            <div class="stats">
-                <div class="stat-item">
-                    <div class="stat-value" id="totalProblems">0</div>
-                    <div class="stat-label">总题数</div>
+        <div class="main-content">
+            <div id="exerciseArea" class="exercise-area hidden">
+                <div class="problem-display" id="problemDisplay">准备开始...</div>
+                <div class="timer" id="timer"></div>
+                <div class="answer-input" id="answerInput">
+                    <input type="number" id="userAnswerInput" placeholder="输入答案" autofocus readonly>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="correctAnswers">0</div>
-                    <div class="stat-label">答对数</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="accuracyRate">0%</div>
-                    <div class="stat-label">准确率</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="timeSpent">0s</div>
-                    <div class="stat-label">用时</div>
+                
+                <div class="number-pad" id="numberPad">
+                    <button class="number-btn" data-number="1">1</button>
+                    <button class="number-btn" data-number="2">2</button>
+                    <button class="number-btn" data-number="3">3</button>
+                    <button class="number-btn" data-number="4">4</button>
+                    <button class="number-btn" data-number="5">5</button>
+                    <button class="number-btn" data-number="6">6</button>
+                    <button class="number-btn" data-number="7">7</button>
+                    <button class="number-btn" data-number="8">8</button>
+                    <button class="number-btn" data-number="9">9</button>
+                    <button class="number-btn number-zero" data-number="0">0</button>
+                    <button class="number-btn delete" id="deleteBtn">←</button>
+                    <button class="number-btn submit" id="submitBtn">提交</button>
                 </div>
             </div>
             
-            <div class="answers-review">
-                <h3>答题详情</h3>
-                <div id="answersList" class="answers-grid"></div>
-            </div>
-            
-            <div style="text-align: center; margin-top: 20px;">
-                <button id="restartBtn" class="btn">重新练习</button>
+            <div id="resultArea" class="result-area">
+                <div class="result-header">
+                    <h2>练习完成！</h2>
+                    <p>以下是您的练习结果</p>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalProblems">0</div>
+                        <div class="stat-label">总题数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="correctAnswers">0</div>
+                        <div class="stat-label">答对数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="accuracyRate">0%</div>
+                        <div class="stat-label">准确率</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="timeSpent">0s</div>
+                        <div class="stat-label">用时</div>
+                    </div>
+                </div>
+                
+                <div class="answers-review">
+                    <h3>答题详情</h3>
+                    <div id="answersList" class="answers-grid"></div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button id="restartBtn" class="btn">重新练习</button>
+                </div>
             </div>
         </div>
     </div>
@@ -342,7 +426,9 @@
         const timerDisplay = document.getElementById('timer');
         const answerInputArea = document.getElementById('answerInput');
         const userAnswerInput = document.getElementById('userAnswerInput');
-        const submitAnswerBtn = document.getElementById('submitAnswerBtn');
+        const numberPad = document.getElementById('numberPad');
+        const deleteBtn = document.getElementById('deleteBtn');
+        const submitBtn = document.getElementById('submitBtn');
         const resultArea = document.getElementById('resultArea');
         const totalProblemsEl = document.getElementById('totalProblems');
         const correctAnswersEl = document.getElementById('correctAnswers');
@@ -508,12 +594,16 @@
             return new Promise((resolve) => {
                 isWaitingForAnswer = true;
                 
+                // 更新界面 - 显示小键盘并隐藏原生输入框
+                numberPad.style.display = 'grid';
+                userAnswerInput.value = '';
+                
                 // 提交答案按钮事件
                 const handleSubmit = () => {
                     if (!isWaitingForAnswer) return;
                     
                     const userAnswer = parseInt(userAnswerInput.value);
-                    if (isNaN(userAnswer)) {
+                    if (isNaN(userAnswer) || userAnswerInput.value === '') {
                         alert("请输入有效的数字答案");
                         return;
                     }
@@ -531,12 +621,28 @@
 
                     isWaitingForAnswer = false;
                     answerInputArea.style.display = 'none';
+                    numberPad.style.display = 'none';
                     
                     // 移除事件监听器
-                    submitAnswerBtn.removeEventListener('click', handleSubmit);
                     userAnswerInput.removeEventListener('keypress', handleKeyPress);
                     
+                    // 移除数字键盘事件监听器
+                    numberButtons.forEach(btn => btn.removeEventListener('click', handleNumberClick));
+                    deleteBtn.removeEventListener('click', handleDelete);
+                    submitBtn.removeEventListener('click', handleSubmit);
+                    
                     resolve();
+                };
+                
+                // 数字按钮点击事件
+                const handleNumberClick = (event) => {
+                    const number = event.target.getAttribute('data-number');
+                    userAnswerInput.value += number;
+                };
+                
+                // 删除按钮事件
+                const handleDelete = () => {
+                    userAnswerInput.value = userAnswerInput.value.slice(0, -1);
                 };
                 
                 // 回车键提交
@@ -546,9 +652,14 @@
                     }
                 };
                 
+                // 获取所有数字按钮
+                const numberButtons = document.querySelectorAll('.number-btn[data-number]');
+                
                 // 添加事件监听器
-                submitAnswerBtn.addEventListener('click', handleSubmit);
                 userAnswerInput.addEventListener('keypress', handleKeyPress);
+                numberButtons.forEach(btn => btn.addEventListener('click', handleNumberClick));
+                deleteBtn.addEventListener('click', handleDelete);
+                submitBtn.addEventListener('click', handleSubmit);
             });
         }
 
@@ -561,6 +672,10 @@
             // 更新按钮状态
             startBtn.disabled = false;
             stopBtn.disabled = true;
+
+            // 隐藏答案输入和小键盘
+            answerInputArea.style.display = 'none';
+            if(numberPad) numberPad.style.display = 'none';
 
             // 显示结果
             showResults(timeSpent);
@@ -607,6 +722,14 @@
             startPractice();
         }
 
+        // 初始化小键盘事件监听器
+        function initNumberPad() {
+            // 不需要在这里添加监听器，因为它们在waitForUserAnswer中动态添加和移除
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initNumberPad);
+
         // 停止练习
         function stopPractice() {
             if (timerInterval) {
@@ -621,6 +744,7 @@
             stopBtn.disabled = true;
             exerciseArea.classList.add('hidden');
             answerInputArea.style.display = 'none';
+            if(numberPad) numberPad.style.display = 'none';
             isWaitingForAnswer = false;
         }
 
