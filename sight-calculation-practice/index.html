@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视算生成练习</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --bg-color: #f5f6fa;
+            --card-bg: white;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .setup-panel {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .control-row input[type="number"],
+        .control-row input[type="range"] {
+            width: 100px;
+        }
+
+        .control-row > div {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        .btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .btn-start {
+            background-color: var(--success-color);
+        }
+
+        .btn-start:hover {
+            background-color: #219653;
+        }
+
+        .btn-stop {
+            background-color: var(--danger-color);
+        }
+
+        .btn-stop:hover {
+            background-color: #c0392b;
+        }
+
+        .exercise-area {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .problem-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 20px 0;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timer {
+            font-size: 18px;
+            color: var(--accent-color);
+            margin-top: 10px;
+        }
+
+        .answer-input {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .answer-input input {
+            font-size: 24px;
+            padding: 10px;
+            border: 2px solid var(--accent-color);
+            border-radius: 5px;
+            width: 150px;
+            text-align: center;
+        }
+
+        .answer-input button {
+            margin-left: 10px;
+            font-size: 16px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .result-area {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background-color: var(--bg-color);
+            border-radius: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .answers-review {
+            margin-top: 20px;
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .answer-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .answer-correct {
+            color: var(--success-color);
+        }
+
+        .answer-wrong {
+            color: var(--danger-color);
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="setup-panel">
+            <h2>视算生成练习</h2>
+            <p>自定义练习参数，训练心算能力</p>
+            
+            <div class="control-group">
+                <label for="problemCount">题目数量</label>
+                <div class="control-row">
+                    <div>
+                        <input type="number" id="problemCount" min="1" max="100" value="10">
+                        <span>道题</span>
+                    </div>
+                    <input type="range" id="problemCountSlider" min="1" max="100" value="10">
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label for="resultRange">得数范围</label>
+                <div class="control-row">
+                    <div>
+                        <input type="number" id="resultRange" min="10" max="1000" value="100">
+                        <span>以内</span>
+                    </div>
+                    <input type="range" id="resultRangeSlider" min="10" max="1000" value="100">
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label for="displayInterval">每题显示间隔</label>
+                <div class="control-row">
+                    <div>
+                        <input type="number" id="displayInterval" min="1" max="60" value="5">
+                        <span>秒</span>
+                    </div>
+                    <input type="range" id="displayIntervalSlider" min="1" max="60" value="5">
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="startBtn" class="btn btn-start">开始练习</button>
+                <button id="stopBtn" class="btn btn-stop" disabled>停止练习</button>
+            </div>
+        </div>
+        
+        <div id="exerciseArea" class="exercise-area hidden">
+            <div class="problem-display" id="problemDisplay">准备开始...</div>
+            <div class="timer" id="timer"></div>
+            <div class="answer-input" id="answerInput">
+                <input type="number" id="userAnswerInput" placeholder="输入答案" autofocus>
+                <button id="submitAnswerBtn" class="btn">提交</button>
+            </div>
+        </div>
+        
+        <div id="resultArea" class="result-area">
+            <div class="result-header">
+                <h2>练习完成！</h2>
+                <p>以下是您的练习结果</p>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalProblems">0</div>
+                    <div class="stat-label">总题数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="correctAnswers">0</div>
+                    <div class="stat-label">答对数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="accuracyRate">0%</div>
+                    <div class="stat-label">准确率</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="timeSpent">0s</div>
+                    <div class="stat-label">用时</div>
+                </div>
+            </div>
+            
+            <div class="answers-review">
+                <h3>答题详情</h3>
+                <div id="answersList" class="answers-grid"></div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button id="restartBtn" class="btn">重新练习</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const problemCountInput = document.getElementById('problemCount');
+        const problemCountSlider = document.getElementById('problemCountSlider');
+        const resultRangeInput = document.getElementById('resultRange');
+        const resultRangeSlider = document.getElementById('resultRangeSlider');
+        const displayIntervalInput = document.getElementById('displayInterval');
+        const displayIntervalSlider = document.getElementById('displayIntervalSlider');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const exerciseArea = document.getElementById('exerciseArea');
+        const problemDisplay = document.getElementById('problemDisplay');
+        const timerDisplay = document.getElementById('timer');
+        const answerInputArea = document.getElementById('answerInput');
+        const userAnswerInput = document.getElementById('userAnswerInput');
+        const submitAnswerBtn = document.getElementById('submitAnswerBtn');
+        const resultArea = document.getElementById('resultArea');
+        const totalProblemsEl = document.getElementById('totalProblems');
+        const correctAnswersEl = document.getElementById('correctAnswers');
+        const accuracyRateEl = document.getElementById('accuracyRate');
+        const timeSpentEl = document.getElementById('timeSpent');
+        const answersListEl = document.getElementById('answersList');
+        const restartBtn = document.getElementById('restartBtn');
+
+        // 全局变量
+        let problems = [];
+        let currentProblemIndex = 0;
+        let startTime = null;
+        let endTime = null;
+        let timerInterval = null;
+        let displayIntervalId = null;
+        let userAnswers = [];
+        let isWaitingForAnswer = false;
+
+        // 绑定滑块和输入框之间的同步事件
+        problemCountInput.addEventListener('input', () => {
+            problemCountSlider.value = problemCountInput.value;
+        });
+        
+        problemCountSlider.addEventListener('input', () => {
+            problemCountInput.value = problemCountSlider.value;
+        });
+
+        resultRangeInput.addEventListener('input', () => {
+            resultRangeSlider.value = resultRangeInput.value;
+        });
+        
+        resultRangeSlider.addEventListener('input', () => {
+            resultRangeInput.value = resultRangeSlider.value;
+        });
+
+        displayIntervalInput.addEventListener('input', () => {
+            displayIntervalSlider.value = displayIntervalInput.value;
+        });
+        
+        displayIntervalSlider.addEventListener('input', () => {
+            displayIntervalInput.value = displayIntervalSlider.value;
+        });
+
+        // 生成随机算式
+        function generateProblem(maxResult) {
+            // 确保生成一个合理的算式，结果不超过maxResult
+            const operation = Math.random() > 0.5 ? '+' : '-';
+            let num1, num2, result;
+
+            if (operation === '+') {
+                // 加法：两个数都小于maxResult的一半，确保结果不超过maxResult
+                num1 = Math.floor(Math.random() * Math.floor(maxResult / 2)) + 1;
+                num2 = Math.floor(Math.random() * Math.min(maxResult - num1, Math.floor(maxResult / 2))) + 1;
+                result = num1 + num2;
+            } else {
+                // 减法：被减数不超过maxResult，减数小于被减数
+                num1 = Math.floor(Math.random() * (maxResult - 1)) + 2; // 被减数至少为2
+                num2 = Math.floor(Math.random() * (num1 - 1)) + 1; // 减数小于被减数
+                result = num1 - num2;
+            }
+
+            return {
+                num1,
+                num2,
+                operation,
+                result,
+                expression: `${num1} ${operation} ${num2} = ?`
+            };
+        }
+
+        // 生成指定数量的问题
+        function generateProblems(count, maxResult) {
+            const problems = [];
+            for (let i = 0; i < count; i++) {
+                problems.push(generateProblem(maxResult));
+            }
+            return problems;
+        }
+
+        // 开始练习
+        async function startPractice() {
+            // 获取用户设置
+            const problemCount = parseInt(problemCountInput.value);
+            const maxResult = parseInt(resultRangeInput.value);
+            const intervalSeconds = parseInt(displayIntervalInput.value);
+
+            // 生成问题
+            problems = generateProblems(problemCount, maxResult);
+            currentProblemIndex = 0;
+            userAnswers = [];
+
+            // 更新界面状态
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            exerciseArea.classList.remove('hidden');
+            resultArea.style.display = 'none';
+
+            problemDisplay.textContent = "准备开始...";
+            timerDisplay.textContent = `准备中...`;
+            answerInputArea.style.display = 'none';
+
+            // 记录开始时间
+            startTime = new Date();
+
+            // 开始播放题目
+            await runExercise(intervalSeconds);
+        }
+
+        // 运行练习流程
+        async function runExercise(intervalSeconds) {
+            while (currentProblemIndex < problems.length) {
+                // 显示题目
+                problemDisplay.textContent = problems[currentProblemIndex].expression;
+                timerDisplay.textContent = `倒计时: ${intervalSeconds}`;
+                answerInputArea.style.display = 'none';
+
+                // 显示倒计时
+                await new Promise(resolve => {
+                    let countdown = intervalSeconds;
+                    const updateTimer = () => {
+                        timerDisplay.textContent = `倒计时: ${countdown}`;
+                        countdown--;
+
+                        if (countdown < 0) {
+                            clearInterval(timerInterval);
+                            resolve();
+                        }
+                    };
+
+                    updateTimer();
+                    timerInterval = setInterval(updateTimer, 1000);
+                });
+
+                // 清空显示并显示答案输入框
+                problemDisplay.textContent = "请写下你的答案";
+                timerDisplay.textContent = "输入答案并点击提交";
+                answerInputArea.style.display = 'block';
+                userAnswerInput.value = '';
+                userAnswerInput.focus();
+                
+                // 等待用户输入答案
+                await waitForUserAnswer();
+
+                currentProblemIndex++;
+
+                // 如果不是最后一题，等待一点时间再显示下一题
+                if (currentProblemIndex < problems.length) {
+                    problemDisplay.textContent = "准备下一题...";
+                    timerDisplay.textContent = "";
+                    answerInputArea.style.display = 'none';
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                } else {
+                    answerInputArea.style.display = 'none';
+                }
+            }
+
+            // 练习结束
+            endPractice();
+        }
+
+        // 等待用户输入答案
+        function waitForUserAnswer() {
+            return new Promise((resolve) => {
+                isWaitingForAnswer = true;
+                
+                // 提交答案按钮事件
+                const handleSubmit = () => {
+                    if (!isWaitingForAnswer) return;
+                    
+                    const userAnswer = parseInt(userAnswerInput.value);
+                    if (isNaN(userAnswer)) {
+                        alert("请输入有效的数字答案");
+                        return;
+                    }
+                    
+                    // 检查用户答案
+                    const isCorrect = userAnswer === problems[currentProblemIndex].result;
+                    
+                    // 存储用户答案
+                    userAnswers.push({
+                        expression: problems[currentProblemIndex].expression,
+                        correctAnswer: problems[currentProblemIndex].result,
+                        userAnswer: userAnswer,
+                        isCorrect: isCorrect
+                    });
+
+                    isWaitingForAnswer = false;
+                    answerInputArea.style.display = 'none';
+                    
+                    // 移除事件监听器
+                    submitAnswerBtn.removeEventListener('click', handleSubmit);
+                    userAnswerInput.removeEventListener('keypress', handleKeyPress);
+                    
+                    resolve();
+                };
+                
+                // 回车键提交
+                const handleKeyPress = (event) => {
+                    if (event.key === 'Enter') {
+                        handleSubmit();
+                    }
+                };
+                
+                // 添加事件监听器
+                submitAnswerBtn.addEventListener('click', handleSubmit);
+                userAnswerInput.addEventListener('keypress', handleKeyPress);
+            });
+        }
+
+        // 结束练习
+        function endPractice() {
+            // 记录结束时间
+            endTime = new Date();
+            const timeSpent = ((endTime - startTime) / 1000).toFixed(2);
+
+            // 更新按钮状态
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+
+            // 显示结果
+            showResults(timeSpent);
+        }
+
+        // 显示结果
+        function showResults(timeSpent) {
+            // 计算统计数据
+            const totalProblems = problems.length;
+            const correctAnswers = userAnswers.filter(answer => answer.isCorrect).length;
+            const accuracyRate = totalProblems > 0 ? Math.round((correctAnswers / totalProblems) * 100) : 0;
+
+            // 更新统计显示
+            totalProblemsEl.textContent = totalProblems;
+            correctAnswersEl.textContent = correctAnswers;
+            accuracyRateEl.textContent = `${accuracyRate}%`;
+            timeSpentEl.textContent = `${timeSpent}s`;
+
+            // 生成答案列表
+            answersListEl.innerHTML = '';
+            userAnswers.forEach((answer, index) => {
+                const answerItem = document.createElement('div');
+                answerItem.className = 'answer-item';
+                
+                const correctnessClass = answer.isCorrect ? 'answer-correct' : 'answer-wrong';
+                const correctnessText = answer.isCorrect ? '✓ 正确' : `✗ 错误(应为: ${answer.correctAnswer})`;
+                
+                answerItem.innerHTML = `
+                    <span>${answer.expression}</span>
+                    <span class="${correctnessClass}">${answer.userAnswer || '未作答'} ${correctnessText}</span>
+                `;
+                
+                answersListEl.appendChild(answerItem);
+            });
+
+            // 显示结果区域
+            resultArea.style.display = 'block';
+        }
+
+        // 重新开始练习
+        function restartPractice() {
+            resultArea.style.display = 'none';
+            exerciseArea.classList.add('hidden');
+            startPractice();
+        }
+
+        // 停止练习
+        function stopPractice() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            if (displayIntervalId) {
+                clearInterval(displayIntervalId);
+            }
+
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            exerciseArea.classList.add('hidden');
+            answerInputArea.style.display = 'none';
+            isWaitingForAnswer = false;
+        }
+
+        // 事件监听器
+        startBtn.addEventListener('click', startPractice);
+        stopBtn.addEventListener('click', stopPractice);
+        restartBtn.addEventListener('click', restartPractice);
+    </script>
+</body>
+</html>
