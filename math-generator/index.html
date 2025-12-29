@@ -214,6 +214,16 @@
                 <label><input type="checkbox" id="op_div"> 除</label>
             </div>
         </div>
+        
+        <div class="control-group">
+            <label>连加连减</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="op_addsubmix" checked> 连加 (A+B+C)</label>
+                <label><input type="checkbox" id="op_subsubmix" checked> 连减 (A-B-C)</label>
+                <label><input type="checkbox" id="op_addsub" checked> 加减混合 (A+B-C)</label>
+                <label><input type="checkbox" id="op_subadd" checked> 减加混合 (A-B+C)</label>
+            </div>
+        </div>
 
         <div class="btn-group">
             <button class="btn-gen" onclick="generateSheet()">生成试题</button>
@@ -257,12 +267,20 @@
             const useSub = document.getElementById('op_sub').checked;
             const useMul = document.getElementById('op_mul').checked;
             const useDiv = document.getElementById('op_div').checked;
+            const useAddMix = document.getElementById('op_addsubmix').checked;
+            const useSubMix = document.getElementById('op_subsubmix').checked;
+            const useAddSub = document.getElementById('op_addsub').checked;
+            const useSubAdd = document.getElementById('op_subadd').checked;
 
             const operations = [];
             if (useAdd) operations.push('+');
             if (useSub) operations.push('-');
             if (useMul) operations.push('*');
             if (useDiv) operations.push('/');
+            if (useAddMix) operations.push('++');
+            if (useSubMix) operations.push('--');
+            if (useAddSub) operations.push('+-');
+            if (useSubAdd) operations.push('-+');
 
             if (operations.length === 0) {
                 alert("请至少选择一种运算方式！");
@@ -287,34 +305,64 @@
                 if (safetyCounter > 10000) break;
 
                 const op = operations[getRandomInt(0, operations.length - 1)];
-                let a, b, symbol;
+                let a, b, c, symbol, symbol2;
                 let isValid = false;
+                let qStr = '';
 
                 if (op === '+') {
                     a = getRandomInt(0, maxVal);
                     b = getRandomInt(0, maxVal);
                     if (a + b <= maxVal && a + b > 0) isValid = true;
                     symbol = '+';
+                    qStr = `${a} ${symbol} ${b} = `;
                 } else if (op === '-') {
                     a = getRandomInt(0, maxVal);
                     b = getRandomInt(0, maxVal);
                     if (a - b >= 0) isValid = true;
                     symbol = '-';
+                    qStr = `${a} ${symbol} ${b} = `;
                 } else if (op === '*') {
                     a = getRandomInt(0, maxVal);
                     b = getRandomInt(0, maxVal);
                     if (a * b <= maxVal && a * b > 0) isValid = true;
                     symbol = '×';
+                    qStr = `${a} ${symbol} ${b} = `;
                 } else if (op === '/') {
                     b = getRandomInt(1, Math.floor(maxVal/2));
                     let result = getRandomInt(1, Math.floor(maxVal/b));
                     a = b * result;
                     if (a <= maxVal && a > 0) isValid = true;
                     symbol = '÷';
+                    qStr = `${a} ${symbol} ${b} = `;
+                } else if (op === '++') { // 连加：两个加法运算
+                    a = getRandomInt(0, maxVal);
+                    b = getRandomInt(0, maxVal - a); // 确保 a + b 不超过范围
+                    c = getRandomInt(0, maxVal - a - b); // 确保 a + b + c 不超过范围
+                    if (a + b + c <= maxVal && a + b + c > 0) isValid = true;
+                    symbol = '+';
+                    qStr = `${a} ${symbol} ${b} ${symbol} ${c} = `;
+                } else if (op === '--') { // 连减：两个减法运算
+                    a = getRandomInt(2, maxVal);
+                    b = getRandomInt(0, a); // b不能大于a
+                    c = getRandomInt(0, a - b); // c不能大于(a-b)
+                    if (a - b - c >= 0) isValid = true;
+                    symbol = '-';
+                    qStr = `${a} ${symbol} ${b} ${symbol} ${c} = `;
+                } else if (op === '+-') { // 加减混合：先加后减
+                    a = getRandomInt(0, maxVal);
+                    b = getRandomInt(0, maxVal - a); // 确保 a + b 不超过范围
+                    c = getRandomInt(0, a + b); // 确保 (a + b) - c >= 0
+                    if (a + b - c >= 0 && a + b <= maxVal) isValid = true;
+                    qStr = `${a} + ${b} - ${c} = `;
+                } else if (op === '-+') { // 加减混合：先减后加
+                    a = getRandomInt(0, maxVal);
+                    b = getRandomInt(0, a); // b不能大于a
+                    c = getRandomInt(0, maxVal - (a - b)); // 确保 (a - b) + c 不超过范围
+                    if (a - b + c <= maxVal) isValid = true;
+                    qStr = `${a} - ${b} + ${c} = `;
                 }
 
                 if (isValid) {
-                    const qStr = `${a} ${symbol} ${b} = `;
                     // 渲染到页面
                     const div = document.createElement('div');
                     div.className = 'question-item';
